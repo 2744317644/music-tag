@@ -1,10 +1,17 @@
-# 网易云音乐标签刮削器 · Compose Multiplatform + SaltUI
+﻿# 网易云音乐标签刮削器 · Compose Multiplatform + SaltUI
+
+[![CI](https://github.com/2744317644/music-tag/actions/workflows/ci.yml/badge.svg)](https://github.com/2744317644/music-tag/actions/workflows/ci.yml)
+[![Release](https://github.com/2744317644/music-tag/actions/workflows/release.yml/badge.svg)](https://github.com/2744317644/music-tag/actions/workflows/release.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 一套 **Kotlin Multiplatform + Compose Multiplatform** 工程，目标平台 **Windows / Android / iOS**。
 界面使用 [SaltUI](https://github.com/Moriafly/SaltUI)（Salt Player 的组件库），
 加密、接口、标签读写、匹配、人工确认清单全部在 `commonMain`，三端共用同一份代码。
 
+仓库：<https://github.com/2744317644/music-tag>
+
 ![主界面](docs/screenshot.png)
+
 
 ![写入确认清单](docs/screenshot-review.png)
 
@@ -21,18 +28,19 @@ java -jar E:\App\NeteaseTagger-KMP\out\NeteaseTagger.jar
 **需要 JDK 21+**（本机已装在 `D:\jdk21`）。原因见「为什么要 JDK 21」。
 或者直接双击/运行 `run.ps1`。
 
-从源码构建：
+从源码构建（已带 Gradle wrapper，首次会自动下载 Gradle 8.13）：
 
 ```powershell
 $env:JAVA_HOME = "D:\jdk21"
-$env:GRADLE_USER_HOME = "D:\gradle-home"
-$env:TEMP = "D:\dsh-temp"; $env:TMP = "D:\dsh-temp"
-cd E:\App\NeteaseTagger-KMP
+git clone https://github.com/2744317644/music-tag.git
+cd music-tag
 
-& "D:\gradle813\bin\gradle.bat" :desktopApp:run          # 直接运行
-& "D:\gradle813\bin\gradle.bat" :desktopApp:fatJar       # 免安装 jar
-& "D:\gradle813\bin\gradle.bat" :shared:jvmTest          # 全部测试
+.\gradlew.bat :desktopApp:run          # 直接运行
+.\gradlew.bat :desktopApp:fatJar       # 免安装 jar → desktopApp/build/libs/
+.\gradlew.bat :shared:jvmTest          # 全部测试
 ```
+
+macOS / Linux 用 `./gradlew …`。
 
 ---
 
@@ -136,7 +144,7 @@ NeteaseTagger-KMP/
 ├─ desktopApp/                          # Windows / macOS / Linux 入口
 ├─ androidApp/                          # Android 入口（有 SDK 时自动纳入构建）
 ├─ iosApp/                              # iOS 入口（SwiftUI + xcodegen 配置）
-├─ demo-library/                        # 演示用的小曲库（4 个文件）
+├─ demo-library/                        # 本地演示曲库（已 gitignore，不入库）
 └─ docs/                                # 截图
 ```
 
@@ -175,6 +183,28 @@ iOS 上没有可用标签库；桌面用 jaudiotagger 会导致三端行为不�
 
 ---
 
+## 自动构建（GitHub Actions）
+
+推送到 `main` 或提 PR 会自动跑 [`.github/workflows/ci.yml`](.github/workflows/ci.yml)：
+
+| Job | 内容 | 产物 |
+| --- | --- | --- |
+| `test` | Ubuntu + Windows 双平台跑 31 项单元测试 | 测试报告（artifact） |
+| `desktop` | 打包免安装 jar | `NeteaseTagger.jar` |
+| `android` | 装 Android SDK 34 后打包 | `app-debug.apk` |
+| `ios` | macOS 上编译 Kotlin framework | — |
+
+`ios` 这个 job 目前标了 `continue-on-error: true`：iOS 代码还没在真机/macOS 上编译验证过，
+首次跑可能暴露问题。修好后应该去掉这个标记。
+
+打 tag（如 `v1.0.0`）会触发 [`release.yml`](.github/workflows/release.yml)，
+自动构建并把 jar 发布到 Releases：
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+---
 ## 为什么是 JDK 21
 
 SaltUI 2.5.2 的 desktop 产物用 Java 21 编译（class file 65）。

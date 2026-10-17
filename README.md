@@ -55,8 +55,8 @@ macOS / Linux 用 `./gradlew …`。
 | MP3 / FLAC / M4A 标签读写 | ✅ 写入+回读+二次写入 | 10 字段全对，含封面/歌词，8 项 |
 | **确认清单语义** | ✅ **未勾选绝不写入** | 5 项：预演/部分勾选/全不勾选逐个验证 |
 | 桌面界面（SaltUI） | ✅ 实际启动并截图 | 见上方两张截图 |
-| Android 构建 | ⚠️ 代码完整，本机无 SDK 未验证 | 装 SDK 后 `:androidApp:assembleDebug` |
-| iOS 构建 | ⚠️ 代码完整，需 macOS+Xcode | Windows 上该任务 SKIPPED |
+| Android 打包 | ✅ CI 通过 | GitHub Actions 产出 `app-debug.apk` |
+| iOS 编译 | ✅ CI 通过（macOS runner） | `linkDebugFrameworkIosSimulatorArm64` 成功 |
 
 **测试总计 31 项，全部通过。**
 
@@ -194,8 +194,8 @@ iOS 上没有可用标签库；桌面用 jaudiotagger 会导致三端行为不�
 | `android` | 装 Android SDK 34 后打包 | `app-debug.apk` |
 | `ios` | macOS 上编译 Kotlin framework | — |
 
-`ios` 这个 job 目前标了 `continue-on-error: true`：iOS 代码还没在真机/macOS 上编译验证过，
-首次跑可能暴露问题。修好后应该去掉这个标记。
+所有 job 都是严格模式（无 `continue-on-error`）。iOS job 一开始就把 commonMain 里的
+`synchronized`、`okio .use {}` 这类 JVM 专属 API 暴露了出来，已全部改成三端通用写法。
 
 打 tag（如 `v1.0.0`）会触发 [`release.yml`](.github/workflows/release.yml)，
 自动构建并把 jar 发布到 Releases：
@@ -257,7 +257,7 @@ Kotlin/Native 的 Apple 目标只能在 macOS 上链接与签名。
 2. **OGG 写入**要求新旧标签等长，否则中止并提示。日常 MP3/FLAC/M4A 不受影响。
 3. **网易云限流**返回 `code=405 操作频繁`，客户端轮询 6 个搜索端点 + 30 分钟缓存。
 4. **无版权曲目**搜不到原版时停在「待确认」，需人工挑或跳过。
-5. **Android/iOS 未在真实设备验证**（本机无 SDK、无 macOS）。
+5. **Android/iOS 已在 CI 编译通过，但没在真机跑过**（本机无 SDK、无 macOS）。
 6. 界面为桌面宽屏布局；窄窗口下按钮会换行，但未做移动端紧凑布局优化。
 
 ---

@@ -108,9 +108,6 @@ jobs:
   ios:
     name: iOS / 编译 Kotlin framework
     runs-on: macos-latest
-    # iOS 代码在本仓库从未于 macOS 上编译过，首次跑可能暴露问题。
-    # 设成 advisory 只是为了避免阻塞其他平台；修好后应去掉 continue-on-error。
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 

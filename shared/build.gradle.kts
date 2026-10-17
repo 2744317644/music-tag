@@ -21,7 +21,7 @@ if (androidEnabled) {
     apply(plugin = "com.android.library")
     configure<LibraryExtension> {
         namespace = "app.tagger.shared"
-        compileSdk = 34
+        compileSdk = 35
         defaultConfig {
             minSdk = 24
         }

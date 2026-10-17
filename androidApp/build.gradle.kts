@@ -1,4 +1,4 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
@@ -30,12 +30,12 @@ kotlin {
 
 android {
     namespace = "app.tagger.android"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "app.tagger.android"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
     }

@@ -1,15 +1,13 @@
-# XcodeGen 配置：在 macOS 上执行 `xcodegen generate` 即可生成 iosApp.xcodeproj
+# XcodeGen 配置：在 macOS 上执行 `xcodegen generate` 生成 iosApp.xcodeproj
 #
-# 前提：
+# 前置：
 #   1. macOS + Xcode 15+
-#   2. 已在 E:\App\music-tag 执行过
-#        ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
-#      （或在 Intel Mac 上用 linkDebugFrameworkIosX64，真机用 linkDebugFrameworkIosArm64）
-#   3. 已安装 xcodegen：brew install xcodegen
+#   2. brew install xcodegen
+#   3. framework 由下面的 preBuildScript 自动构建，无需手动执行
 name: iosApp
 
 options:
-  bundleIdPrefix: app.tagger
+  bundleIdPrefix: app.musictag
   deploymentTarget:
     iOS: "15.0"
   createIntermediateGroups: true
@@ -17,6 +15,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.9"
+    # Gradle 需要在 preBuild 脚本里跑，必须关掉沙箱
     ENABLE_USER_SCRIPT_SANDBOXING: NO
 
 targets:
@@ -29,10 +28,11 @@ targets:
       path: iosApp/Info.plist
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: app.tagger.ios
+        PRODUCT_BUNDLE_IDENTIFIER: app.musictag.ios
         PRODUCT_NAME: MusicTag
-        # 指向 Gradle 产出的 Shared.framework 所在目录
+        # Kotlin framework 搜索路径：真机与模拟器都放上，按 sdk 自动命中
         FRAMEWORK_SEARCH_PATHS:
+          - "$(SRCROOT)/../shared/build/bin/iosArm64/debugFramework"
           - "$(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework"
         OTHER_LDFLAGS:
           - "-framework"
@@ -44,5 +44,10 @@ targets:
       - name: "Build shared Kotlin framework"
         basedOnDependencyAnalysis: false
         script: |
+          set -e
           cd "$SRCROOT/.."
-          ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+          if [ "$PLATFORM_NAME" = "iphonesimulator" ]; then
+            ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+          else
+            ./gradlew :shared:linkDebugFrameworkIosArm64
+          fi

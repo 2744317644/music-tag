@@ -22,6 +22,28 @@
 
 ---
 
+## 下载
+
+到 [Releases](https://github.com/2744317644/music-tag/releases) 下对应平台的包：
+
+| 平台 | 文件 | 说明 |
+| --- | --- | --- |
+| Windows | `music-tag-<ver>.exe` | 安装版，自带 JDK 21 运行时，双击安装 |
+| Windows | `music-tag-windows-x64-portable.zip` | 免安装，解压后双击 `music-tag.exe` |
+| Android | `music-tag-<ver>.apk` | 直接安装，Android 7.0+（minSdk 24） |
+| iOS | `music-tag-<ver>-unsigned.ipa` | **未签名**，需自行签名后才能装（见下） |
+
+两点说明：
+
+- **APK 默认用 debug 密钥签名**，可直接安装，但不能上架商店。要正式签名，在仓库
+  Secrets 里配 `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD` /
+  `ANDROID_KEY_ALIAS` / `ANDROID_KEY_PASSWORD` 即可，流水线会自动改用你的证书。
+- **iOS 的 ipa 是未签名的**。iOS 要求 Apple 开发者证书签名，没有账号就无法产出「点开即装」的包；
+  开源项目通行的做法是发未签名包，由使用者用自己的 Apple ID 重新签名后侧载
+  （Sideloadly / AltStore 都可以）。
+
+---
+
 ## 立即可用：Windows 桌面版
 
 ```powershell
@@ -38,9 +60,12 @@ $env:JAVA_HOME = "D:\jdk21"
 git clone https://github.com/2744317644/music-tag.git
 cd music-tag
 
-.\gradlew.bat :desktopApp:run          # 直接运行
-.\gradlew.bat :desktopApp:fatJar       # 免安装 jar → desktopApp/build/libs/
-.\gradlew.bat :shared:jvmTest          # 全部测试
+.\gradlew.bat :desktopApp:run               # 直接运行
+.\gradlew.bat :desktopApp:fatJar            # 单文件 jar → desktopApp/build/libs/
+.\gradlew.bat :desktopApp:packageExe        # Windows 安装包（需 WiX）
+.\gradlew.bat :desktopApp:createDistributable  # 便携版目录（内含 music-tag.exe）
+.\gradlew.bat :androidApp:assembleRelease   # APK
+.\gradlew.bat :shared:jvmTest               # 全部测试
 ```
 
 macOS / Linux 用 `./gradlew …`。
@@ -58,8 +83,9 @@ macOS / Linux 用 `./gradlew …`。
 | MP3 / FLAC / M4A 标签读写 | ✅ 写入+回读+二次写入 | 10 字段全对，含封面/歌词，8 项 |
 | **确认清单语义** | ✅ **未勾选绝不写入** | 5 项：预演/部分勾选/全不勾选逐个验证 |
 | 桌面界面（SaltUI） | ✅ 实际启动并截图 | 见上方两张截图 |
-| Android 打包 | ✅ CI 通过 | GitHub Actions 产出 `app-debug.apk` |
-| iOS 编译 | ✅ CI 通过（macOS runner） | `linkDebugFrameworkIosSimulatorArm64` 成功 |
+| Android 打包 | ✅ CI 通过 | 发布 `music-tag-<ver>.apk`（16 MB） |
+| iOS 打包 | ✅ CI 通过（macOS runner） | 发布未签名 ipa（15 MB），`BUILD SUCCEEDED` |
+| Windows 安装包 | ✅ CI 通过 | 发布 `music-tag-<ver>.exe`（100 MB，含运行时） |
 
 **测试总计 31 项，全部通过。**
 
@@ -188,26 +214,40 @@ iOS 上没有可用标签库；桌面用 jaudiotagger 会导致三端行为不�
 
 ## 自动构建（GitHub Actions）
 
+### 每次推送：`ci.yml`
+
 推送到 `main` 或提 PR 会自动跑 [`.github/workflows/ci.yml`](.github/workflows/ci.yml)：
 
-| Job | 内容 | 产物 |
-| --- | --- | --- |
-| `test` | Ubuntu + Windows 双平台跑 31 项单元测试 | 测试报告（artifact） |
-| `desktop` | 打包免安装 jar | `music-tag.jar` |
-| `android` | 装 Android SDK 34 后打包 | `app-debug.apk` |
-| `ios` | macOS 上编译 Kotlin framework | — |
+| Job | 内容 |
+| --- | --- |
+| `test` | Ubuntu + Windows 双平台跑 31 项单元测试 |
+| `desktop` | 打包单文件 jar |
+| `android` | 打包 debug APK |
+| `ios` | macOS 上编译 Kotlin framework |
 
 所有 job 都是严格模式（无 `continue-on-error`）。iOS job 一开始就把 commonMain 里的
 `synchronized`、`okio .use {}` 这类 JVM 专属 API 暴露了出来，已全部改成三端通用写法。
 
-打 tag（如 `v1.0.0`）会触发 [`release.yml`](.github/workflows/release.yml)，
-自动构建并把 jar 发布到 Releases：
+### 打 tag：`release.yml`
+
+打 tag（如 `v1.0.0`）触发 [`release.yml`](.github/workflows/release.yml)，三端并行构建后汇总发布：
+
+| Job | 平台 | 产物 |
+| --- | --- | --- |
+| `windows` | windows-latest | `.exe` 安装包（WiX + jpackage）、便携版 zip |
+| `android` | ubuntu-latest | `.apk`（release 构建） |
+| `ios` | macos-latest | 未签名 `.ipa`（xcodegen + xcodebuild） |
+| `publish` | ubuntu-latest | 汇总三端产物、按 tag 命名、创建 Release |
 
 ```bash
 git tag v1.0.0 && git push origin v1.0.0
 ```
 
+`workflow_dispatch` 手动触发时只跑前面三个构建并上传 artifact，**不创建 Release**——
+方便在不发版的情况下验证打包链路。
+
 ---
+
 ## 为什么是 JDK 21
 
 SaltUI 2.5.2 的 desktop 产物用 Java 21 编译（class file 65）。

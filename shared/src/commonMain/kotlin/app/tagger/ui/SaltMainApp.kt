@@ -110,7 +110,7 @@ fun TaggerApp(state: TaggerState, initialReview: StagedWrite? = null) {
         }
     }
 
-    if (ui.showFolderDialog) FolderDialog(state)
+    if (ui.showFolderDialog) FolderDialog(state, scope)
 
     val staged = confirmStaged
     if ((showConfirm || showConfirmByArg) && staged != null) {
@@ -122,6 +122,7 @@ fun TaggerApp(state: TaggerState, initialReview: StagedWrite? = null) {
                 showConfirm = false
                 confirmStaged = null
             },
+            scope = scope,
         )
     }
 }

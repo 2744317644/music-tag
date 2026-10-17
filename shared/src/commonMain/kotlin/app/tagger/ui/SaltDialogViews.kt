@@ -20,7 +20,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,23 +46,28 @@ import androidx.compose.foundation.background
 import androidx.compose.ui.window.Dialog
 import com.moriafly.salt.ui.dialog.DialogTitle
 import com.moriafly.salt.ui.outerPadding
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
  * 目录选择对话框（Salt 风格）。
  *
- * 注意：Compose 的 Dialog 会创建独立 composition，不继承外层 SaltTheme，
- * 所以对话框内容里要再包一次 TaggerTheme，否则会掉回默认浅色配色。
+ * 注意 1：Compose 的 Dialog 会创建独立 composition，不继承外层 SaltTheme，
+ *   所以对话框内容里要再包一次 TaggerTheme，否则会掉回默认浅色配色。
+ *
+ * 注意 2：**不要在对话框内部 rememberCoroutineScope()**。
+ *   对话框关闭会销毁该作用域，连带取消正在跑的扫描，日志里表现为
+ *   "扫描失败：rememberCoroutineScope left the composition"。
+ *   所以长任务的作用域必须由界面根部传入。
  */
 @Composable
-fun FolderDialog(state: TaggerState) {
+fun FolderDialog(state: TaggerState, scope: CoroutineScope) {
     val ui by state.state.collectAsState()
 
     SaltDialog(onDismissRequest = { state.closeFolderDialog() }) {
             Column {
                 var text by remember(ui.directory) { mutableStateOf(ui.directory) }
                 var hint by remember { mutableStateOf("") }
-                val scope = rememberCoroutineScope()
 
                 DialogTitle(text = "选择音乐目录")
                 ItemTip("输入音乐库的绝对路径。桌面版也可以直接用系统对话框选择。")
@@ -137,6 +141,8 @@ fun ConfirmDialog(
     staged: StagedWrite,
     onDismiss: () -> Unit,
     onCommitted: () -> Unit,
+    // 必须用界面根部的作用域：写入可能耗时，对话框关闭不能把任务取消掉
+    scope: CoroutineScope,
 ) {
     val ui by state.state.collectAsState()
 
@@ -146,7 +152,6 @@ fun ConfirmDialog(
                 var dryRun by remember { mutableStateOf(false) }
                 var result by remember { mutableStateOf<CommitResult?>(null) }
                 var committing by remember { mutableStateOf(false) }
-                val scope = rememberCoroutineScope()
 
                 DialogTitle(text = "写入确认清单")
 

@@ -179,6 +179,11 @@ class TaggerState(
                 )
             }
             log.info("扫描完成：${tracks.size} 个文件")
+        } catch (ex: kotlinx.coroutines.CancellationException) {
+            // 扫描被取消（例如界面作用域被销毁）不应报成"扫描失败"
+            log.warn("扫描已取消")
+            mutate { it.copy(statusText = "扫描已取消", progressText = "") }
+            throw ex
         } catch (ex: Exception) {
             log.error("扫描失败：${ex.message}")
             mutate { it.copy(statusText = "扫描失败：${ex.message}", progressText = "") }

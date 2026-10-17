@@ -29,35 +29,51 @@ class PendingServiceTest {
         return dir
     }
 
-    /** 用 ffmpeg 生成一段真实 MP3；不可用则手搓一个最小 ID3 文件。 */
+    /**
+     * 生成一个结构合法的 MP3。
+     *
+     * CI 上没有 ffmpeg，所以不能依赖它；这里优先用 ffmpeg 生成真实音频，
+     * 不可用时手写 "ID3v2.3 空标签 + 3 个完整 MPEG-1 Layer III 帧"。
+     * 注意必须写**完整帧长**（128kbps/44.1kHz = 417 字节/帧），
+     * 只写半个帧会让引擎判定为损坏文件，测试就测不到写入逻辑了。
+     */
     private fun makeMp3(target: File): Boolean {
-        val ok = try {
-            val process = ProcessBuilder(
-                listOf(
-                    "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
-                    "-f", "lavfi", "-i", "sine=frequency=440:duration=1",
-                    "-c:a", "libmp3lame", "-b:a", "128k",
-                    target.absolutePath,
-                ),
-            ).redirectErrorStream(true).start()
-            process.waitFor(60, TimeUnit.SECONDS)
-            target.exists() && target.length() > 100
-        } catch (ex: Exception) {
-            false
+        if (System.getenv("TAGGER_TEST_FORCE_FALLBACK") == null) {
+            val ok = try {
+                val process = ProcessBuilder(
+                    listOf(
+                        "ffmpeg", "-hide_banner", "-loglevel", "error", "-y",
+                        "-f", "lavfi", "-i", "sine=frequency=440:duration=1",
+                        "-c:a", "libmp3lame", "-b:a", "128k",
+                        target.absolutePath,
+                    ),
+                ).redirectErrorStream(true).start()
+                process.waitFor(60, TimeUnit.SECONDS)
+                target.exists() && target.length() > 100
+            } catch (ex: Exception) {
+                false
+            }
+            if (ok) return true
         }
-        if (ok) return true
-        // 退化方案：空 ID3 头 + 假音频
-        return try {
-            val bytes = byteArrayOf(
-                'I'.code.toByte(), 'D'.code.toByte(), '3'.code.toByte(),
-                3, 0, 0, 0, 0, 0, 0,
-                0xFF.toByte(), 0xFB.toByte(), 0x90.toByte(), 0x00.toByte(),
-            ) + ByteArray(200) { 0x55 }
-            target.writeBytes(bytes)
-            true
-        } catch (ex: Exception) {
-            false
-        }
+        return writeMinimalMp3(target)
+    }
+
+    /** 纯 Kotlin 生成最小可解析 MP3（不依赖外部工具）。 */
+    private fun writeMinimalMp3(target: File): Boolean = try {
+        val frame = ByteArray(417)
+        // FF FB 90 00：MPEG-1 Layer III · 128kbps · 44.1kHz · 无填充
+        frame[0] = 0xFF.toByte()
+        frame[1] = 0xFB.toByte()
+        frame[2] = 0x90.toByte()
+        frame[3] = 0x00
+        val out = java.io.ByteArrayOutputStream()
+        // ID3v2.3 头，标签长度为 0
+        out.write(byteArrayOf('I'.code.toByte(), 'D'.code.toByte(), '3'.code.toByte(), 3, 0, 0, 0, 0, 0, 0))
+        repeat(3) { out.write(frame) }
+        target.writeBytes(out.toByteArray())
+        true
+    } catch (ex: Exception) {
+        false
     }
 
     private fun newService(dir: File): PendingService {

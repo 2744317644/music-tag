@@ -91,7 +91,28 @@ internal object Id3v2 {
         val version = head[3].toInt() and 0xFF
         val flags = head[5].toInt() and 0xFF
         val tagSize = syncSafe(head, 6, 4)
-        if (tagSize <= 0) return emptySnapshot(path, "ID3 标签长度非法")
+        // 空标签（size=0）是合法的：只有头部没有帧。之前当成"非法"会让这类文件变成不可写。
+        if (tagSize < 0 || tagSize > size - 10) return emptySnapshot(path, "ID3 标签长度非法")
+        if (tagSize == 0) {
+            // 只有头部、没有帧：等价于"没有标签"，但保持可写
+            val info = Mp3Info.parse(fileSystem, path, 10)
+            return TagSnapshot(
+                path = path.toString(),
+                format = "MP3",
+                durationSeconds = info.durationSeconds,
+                bitrate = info.bitrate,
+                sampleRate = info.sampleRate,
+                channels = info.channels,
+                bitsPerSample = 0,
+                tags = emptyMap(),
+                hasCover = false,
+                coverMime = "",
+                coverSize = 0,
+                coverMd5 = "",
+                writable = true,
+                canEmbedCover = true,
+            )
+        }
 
         val body = readAt(fileSystem, path, 10L, minOf(tagSize, (size - 10).toInt().coerceAtLeast(0)))
         val bodyData = if ((flags and 0x80) != 0) removeUnsync(body) else body

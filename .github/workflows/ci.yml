@@ -85,15 +85,15 @@ jobs:
       - name: 配置 Gradle 缓存
         uses: gradle/actions/setup-gradle@v4
 
-      # 加了这个 action 后会写入 ANDROID_HOME，
-      # settings.gradle.kts 靠它判断是否纳入 :androidApp 模块
-      - name: 准备 Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: 安装 SDK 平台
+      # GitHub 的 ubuntu runner 自带 Android SDK（ANDROID_HOME 已指向它），
+      # settings.gradle.kts 靠这个变量决定是否纳入 :androidApp 模块。
+      # 不要用 android-actions/setup-android：它内部的 sdkmanager 在本环境会失败。
+      - name: 检查 Android SDK
         run: |
-          sdkmanager --install "platforms;android-34" "build-tools;34.0.0" --sdk_root="$ANDROID_HOME"
-          echo "ANDROID_HOME=$ANDROID_HOME" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls "$ANDROID_HOME/platforms" || true
+          ls "$ANDROID_HOME/build-tools" || true
 
       - name: 打包 debug APK
         run: ./gradlew :androidApp:assembleDebug --console=plain

@@ -2,6 +2,7 @@
 
 import okio.FileSystem
 import okio.Path
+import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -115,13 +116,15 @@ data class AppSettings(
 
 /** 运行日志：内存里保留最近若干条，同时可选写到文件。 */
 class RunLog(private val fileSystem: FileSystem? = null, private val filePath: String? = null) {
-
     data class Entry(val atSeconds: Long, val level: String, val message: String)
 
-    private val entries = mutableListOf<Entry>()
-    private val lock = kotlinx.coroutines.sync.Mutex()
+    /**
+     * 用 StateFlow 承载日志：update 是原子操作，三端都可用
+     * （JVM 的 synchronized 在 Kotlin/Native 上没有）。
+     */
+    private val entries = kotlinx.coroutines.flow.MutableStateFlow<List<Entry>>(emptyList())
 
-    val snapshot: List<Entry> get() = entries.toList()
+    val snapshot: List<Entry> get() = entries.value
 
     fun info(message: String) = add("info", message)
     fun warn(message: String) = add("warn", message)
@@ -131,15 +134,15 @@ class RunLog(private val fileSystem: FileSystem? = null, private val filePath: S
         @OptIn(kotlin.time.ExperimentalTime::class)
         val nowSeconds = kotlin.time.Clock.System.now().epochSeconds
         val entry = Entry(nowSeconds, level, message)
-        synchronized(entries) {
-            entries += entry
-            if (entries.size > 2000) repeat(500) { if (entries.isNotEmpty()) entries.removeAt(0) }
+        entries.update { old ->
+            val merged = old + entry
+            if (merged.size > 2000) merged.takeLast(1500) else merged
         }
         if (fileSystem != null && filePath != null) {
             try {
                 val target = okio.Path.Companion.run { filePath.toPath() }
                 target.parent?.let { fileSystem.createDirectories(it) }
-                fileSystem.appendingSink(target).use { sink ->
+                fileSystem.appendingSink(target).useCloseable { sink ->
                     val buffer = okio.Buffer().write("$level: $message\n".encodeToByteArray())
                     sink.write(buffer, buffer.size)
                 }
@@ -150,6 +153,6 @@ class RunLog(private val fileSystem: FileSystem? = null, private val filePath: S
     }
 
     fun clear() {
-        synchronized(entries) { entries.clear() }
+        entries.value = emptyList()
     }
 }

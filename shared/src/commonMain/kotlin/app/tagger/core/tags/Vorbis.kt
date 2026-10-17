@@ -1,4 +1,6 @@
-package app.tagger.core.tags
+﻿package app.tagger.core.tags
+
+import app.tagger.core.useCloseable
 
 import app.tagger.core.Crypto
 
@@ -410,7 +412,7 @@ internal object Vorbis {
         val tail = if (size > keepFrom) readRange(fileSystem, path, keepFrom, (size - keepFrom).toInt()) else ByteArray(0)
         val temporary = (path.parent ?: error("无父目录")) / (path.name + ".tagger-tmp")
         try {
-            fileSystem.sink(temporary).use { sink ->
+            fileSystem.sink(temporary).useCloseable { sink ->
                 sink.write(Buffer().write(newHead), newHead.size.toLong())
                 if (tail.isNotEmpty()) sink.write(Buffer().write(tail), tail.size.toLong())
             }
@@ -425,7 +427,7 @@ internal object Vorbis {
     internal fun readRange(fileSystem: FileSystem, path: Path, offset: Long, length: Int): ByteArray {
         if (length <= 0) return ByteArray(0)
         val buffer = Buffer()
-        fileSystem.source(path).use { source ->
+        fileSystem.source(path).useCloseable { source ->
             skipSource(source, offset)
             var remaining = length.toLong()
             while (remaining > 0) {

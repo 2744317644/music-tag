@@ -1,5 +1,7 @@
 ﻿package app.tagger.core.tags
 
+import app.tagger.core.useCloseable
+
 import app.tagger.core.Crypto
 
 import okio.Buffer
@@ -270,7 +272,7 @@ internal object Id3v2 {
     private fun writeReplaced(fileSystem: FileSystem, path: Path, newHeader: ByteArray, audioStart: Long, size: Long) {
         val temporary = (path.parent ?: error("无父目录")) / (path.name + ".tagger-tmp")
         try {
-            fileSystem.sink(temporary).use { sink ->
+            fileSystem.sink(temporary).useCloseable { sink ->
                 sink.write(Buffer().write(newHeader), newHeader.size.toLong())
                 if (size > audioStart) {
                     val audio = readAt(fileSystem, path, audioStart, (size - audioStart).toInt().coerceAtLeast(0))
@@ -460,7 +462,7 @@ internal object Id3v2 {
             chars.add(code.toChar())
             i += 2
         }
-        return String(chars.toCharArray())
+        return chars.joinToString("")
     }
 
     private fun decodeApic(payload: ByteArray): Pair<ByteArray, String>? {
@@ -541,7 +543,7 @@ internal object Id3v2 {
     internal fun readAt(fileSystem: FileSystem, path: Path, offset: Long, length: Int): ByteArray {
         if (length <= 0) return ByteArray(0)
         val buffer = Buffer()
-        fileSystem.source(path).use { source ->
+        fileSystem.source(path).useCloseable { source ->
             skipSource(source, offset)
             var remaining = length.toLong()
             while (remaining > 0) {

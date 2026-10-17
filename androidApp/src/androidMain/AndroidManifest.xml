@@ -14,7 +14,7 @@
     <application
         android:name=".TaggerApplication"
         android:allowBackup="true"
-        android:label="网易云标签刮削器"
+        android:label="music-tag"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.Tagger">

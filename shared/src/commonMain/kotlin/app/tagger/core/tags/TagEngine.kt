@@ -38,7 +38,7 @@ object Fields {
         TagField("year", "发行日期", listOf(FieldQuery.Album, FieldQuery.Song), FieldQuery.Album, listOf("album", "title", "filename"), "按专辑取发行年份"),
         TagField("track", "音轨号", listOf(FieldQuery.Album), FieldQuery.Album, listOf("album", "filename"), "按专辑曲目顺序取音轨号"),
         TagField("disc", "碟号", listOf(FieldQuery.Album), FieldQuery.Album, listOf("album", "filename"), "按专辑取碟号"),
-        TagField("genre", "风格", listOf(FieldQuery.Album), FieldQuery.Album, listOf("album", "artist", "filename"), "网易云多数专辑没有风格数据"),
+        TagField("genre", "风格", listOf(FieldQuery.Album), FieldQuery.Album, listOf("album", "artist", "filename"), "多数专辑没有风格数据"),
         TagField("composer", "作曲", listOf(FieldQuery.Song), FieldQuery.Song, listOf("title", "filename"), "单曲详情里的作曲者"),
         TagField("copyright", "版权 / 厂牌", listOf(FieldQuery.Song, FieldQuery.Album), FieldQuery.Song, listOf("title", "album", "filename"), "取唱片公司信息"),
         TagField("lyrics", "歌词", listOf(FieldQuery.Song, FieldQuery.Album, FieldQuery.Artist, FieldQuery.Playlist), FieldQuery.Song, listOf("title", "artist", "filename"), "搜索歌曲后取其歌词"),

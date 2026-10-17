@@ -35,12 +35,12 @@ jobs:
       - name: 准备发布文件
         run: |
           mkdir -p release
-          cp desktopApp/build/libs/NeteaseTagger.jar release/NeteaseTagger.jar
+          cp desktopApp/build/libs/music-tag.jar release/music-tag.jar
 
       - name: 创建 Release
         uses: softprops/action-gh-release@v2
         with:
-          files: release/NeteaseTagger.jar
+          files: release/music-tag.jar
           generate_release_notes: true
           body: |
             ## 怎么用
@@ -48,7 +48,7 @@ jobs:
             需要 **JDK 21+**（SaltUI 的 desktop 产物是 Java 21 字节码）。
 
             ```bash
-            java -jar NeteaseTagger.jar
+            java -jar music-tag.jar
             ```
 
             详见 [README](https://github.com/${{ github.repository }}#readme)。

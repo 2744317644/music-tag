@@ -1,4 +1,4 @@
-rootProject.name = "NeteaseTagger"
+rootProject.name = "music-tag"
 
 pluginManagement {
     plugins {

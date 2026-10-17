@@ -1,4 +1,4 @@
-# 网易云音乐标签刮削器 · Compose Multiplatform + SaltUI
+# music-tag
 
 [![CI](https://github.com/2744317644/music-tag/actions/workflows/ci.yml/badge.svg)](https://github.com/2744317644/music-tag/actions/workflows/ci.yml)
 [![Release](https://github.com/2744317644/music-tag/actions/workflows/release.yml/badge.svg)](https://github.com/2744317644/music-tag/actions/workflows/release.yml)
@@ -8,6 +8,9 @@
 界面使用 [SaltUI](https://github.com/Moriafly/SaltUI)（Salt Player 的组件库），
 加密、接口、标签读写、匹配、人工确认清单全部在 `commonMain`，三端共用同一份代码。
 
+功能：为本地音乐库补全标签——按单个字段查找候选、人工勾选确认后才写入文件。
+数据来源是网易云音乐公开 Web 接口（加密协议在仓库内自实现）。
+
 仓库：<https://github.com/2744317644/music-tag>
 
 ![主界面](docs/screenshot.png)
@@ -15,14 +18,14 @@
 
 ![写入确认清单](docs/screenshot-review.png)
 
-> 与 `E:\App\NeteaseTagger`（.NET 8 WinForms 版）并存，互不影响。
+> 与 `E:\App\NeteaseTagger`（.NET 8 WinForms 版，旧实现）并存，互不影响。
 
 ---
 
 ## 立即可用：Windows 桌面版
 
 ```powershell
-java -jar E:\App\NeteaseTagger-KMP\out\NeteaseTagger.jar
+java -jar E:\App\music-tag\out\music-tag.jar
 ```
 
 **需要 JDK 21+**（本机已装在 `D:\jdk21`）。原因见「为什么要 JDK 21」。
@@ -114,7 +117,7 @@ SaltUI 是 Compose Multiplatform 的组件库（Android/Desktop/iOS 同源），
 ## 工程结构
 
 ```
-NeteaseTagger-KMP/
+music-tag/
 ├─ shared/
 │  └─ src/
 │     ├─ commonMain/kotlin/app/tagger/
@@ -190,7 +193,7 @@ iOS 上没有可用标签库；桌面用 jaudiotagger 会导致三端行为不�
 | Job | 内容 | 产物 |
 | --- | --- | --- |
 | `test` | Ubuntu + Windows 双平台跑 31 项单元测试 | 测试报告（artifact） |
-| `desktop` | 打包免安装 jar | `NeteaseTagger.jar` |
+| `desktop` | 打包免安装 jar | `music-tag.jar` |
 | `android` | 装 Android SDK 34 后打包 | `app-debug.apk` |
 | `ios` | macOS 上编译 Kotlin framework | — |
 

@@ -2,7 +2,7 @@
 #
 # 前提：
 #   1. macOS + Xcode 15+
-#   2. 已在 E:\App\NeteaseTagger-KMP 执行过
+#   2. 已在 E:\App\music-tag 执行过
 #        ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 #      （或在 Intel Mac 上用 linkDebugFrameworkIosX64，真机用 linkDebugFrameworkIosArm64）
 #   3. 已安装 xcodegen：brew install xcodegen
@@ -30,7 +30,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.tagger.ios
-        PRODUCT_NAME: NeteaseTagger
+        PRODUCT_NAME: MusicTag
         # 指向 Gradle 产出的 Shared.framework 所在目录
         FRAMEWORK_SEARCH_PATHS:
           - "$(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework"

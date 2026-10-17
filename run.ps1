@@ -1,11 +1,11 @@
-# 启动网易云标签刮削器（桌面版）
+# 启动 music-tag（桌面版）
 # 需要 JDK 21+：SaltUI 的 desktop 产物用 Java 21 编译（class 65）
 # 用法：右键 → 使用 PowerShell 运行
-#   或：pwsh -File E:\App\NeteaseTagger-KMP\run.ps1
+#   或：pwsh -File E:\App\music-tag\run.ps1
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$jar = Join-Path $root "out\NeteaseTagger.jar"
+$jar = Join-Path $root "out\music-tag.jar"
 
 if (-not (Test-Path $jar)) {
     Write-Host "找不到 $jar，先构建一次…" -ForegroundColor Yellow
@@ -20,7 +20,7 @@ if (-not (Test-Path $jar)) {
         Pop-Location
     }
     if (-not (Test-Path $jar)) {
-        $jar = Join-Path $root "desktopApp\build\libs\NeteaseTagger.jar"
+        $jar = Join-Path $root "desktopApp\build\libs\music-tag.jar"
     }
 }
 

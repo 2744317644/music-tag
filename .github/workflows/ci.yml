@@ -65,8 +65,8 @@ jobs:
       - name: 上传 jar
         uses: actions/upload-artifact@v4
         with:
-          name: NeteaseTagger-jar
-          path: desktopApp/build/libs/NeteaseTagger.jar
+          name: music-tag-jar
+          path: desktopApp/build/libs/music-tag.jar
           if-no-files-found: error
 
   android:
@@ -101,7 +101,7 @@ jobs:
       - name: 上传 APK
         uses: actions/upload-artifact@v4
         with:
-          name: NeteaseTagger-debug-apk
+          name: music-tag-debug-apk
           path: androidApp/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
 

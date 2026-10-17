@@ -276,11 +276,11 @@ class NeteaseClient(
 
         if (rateLimited.isNotEmpty() && attempts.isEmpty()) {
             _lastError = "所有搜索端点都在限流：" + rateLimited.take(4).joinToString("、")
-            throw NeteaseException("网易云提示「操作频繁」，暂时查不了「$trimmed」。稍等十几秒再试，或在设置里调低并发。")
+            throw NeteaseException("接口提示「操作频繁」，暂时查不了「$trimmed」。稍等十几秒再试，或在设置里调低并发。")
         }
         _lastError = attempts.takeLast(3).joinToString("；")
         if (rateLimited.isNotEmpty()) {
-            throw NeteaseException("网易云限流中（$_lastError）。稍等片刻再试。")
+            throw NeteaseException("接口限流中（$_lastError）。稍等片刻再试。")
         }
         cache.put(cacheKey, JsonArray(emptyList()))
         return emptyList()

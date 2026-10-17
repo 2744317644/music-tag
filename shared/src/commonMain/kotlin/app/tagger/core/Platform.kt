@@ -8,5 +8,5 @@ expect object Platform {
     val name: String
     val pathSeparator: String
     /** 应用配置/缓存目录（用于放设置文件和日志）。 */
-    fun appDataDirectory(appName: String = "NeteaseTagger"): String
+    fun appDataDirectory(appName: String = "music-tag"): String
 }

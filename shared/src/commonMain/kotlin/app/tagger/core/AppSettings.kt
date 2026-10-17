@@ -34,7 +34,7 @@ data class AppSettings(
     companion object {
         private val json = Json { prettyPrint = true; ignoreUnknownKeys = true }
 
-        fun settingsPath(appName: String = "NeteaseTagger"): String =
+        fun settingsPath(appName: String = "music-tag"): String =
             "${Platform.appDataDirectory(appName)}/settings.json"
 
         fun load(fileSystem: FileSystem, path: String = settingsPath()): AppSettings {

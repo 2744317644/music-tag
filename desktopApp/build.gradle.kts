@@ -34,10 +34,10 @@ compose.desktop {
         mainClass = "app.tagger.desktop.EntryPointKt"
         nativeDistributions {
             targetFormats(TargetFormat.Exe, TargetFormat.Msi)
-            packageName = "NeteaseTagger"
+            packageName = "music-tag"
             packageVersion = "1.0.0"
-            description = "网易云音乐标签刮削器"
-            vendor = "NeteaseTagger"
+            description = "music-tag"
+            vendor = "music-tag"
             windows {
                 menu = true
                 shortcut = true
@@ -55,7 +55,7 @@ compose.desktop {
 val fatJar by tasks.registering(Jar::class) {
     group = "distribution"
     description = "把所有依赖打成一个可执行 jar"
-    archiveFileName.set("NeteaseTagger.jar")
+    archiveFileName.set("music-tag.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         attributes["Main-Class"] = "app.tagger.desktop.EntryPointKt"

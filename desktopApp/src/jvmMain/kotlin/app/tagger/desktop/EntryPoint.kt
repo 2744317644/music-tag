@@ -54,7 +54,7 @@ fun main() {
                 AppSettings.save(FileSystemProvider.system, state.currentSettings())
                 exitApplication()
             },
-            title = "网易云音乐标签刮削器",
+            title = "music-tag",
             state = windowState,
         ) {
             window.minimumSize = Dimension(820, 560)

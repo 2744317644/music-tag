@@ -257,7 +257,7 @@ internal object Vorbis {
 
     private fun buildVorbisComment(comments: Map<String, String>): ByteArray {
         val buffer = Buffer()
-        val vendor = "NeteaseTagger 1.0".encodeToByteArray()
+        val vendor = "music-tag 1.0".encodeToByteArray()
         buffer.writeIntLe(vendor.size)
         buffer.write(vendor)
         val entries = comments.entries.filter { it.value.isNotEmpty() }

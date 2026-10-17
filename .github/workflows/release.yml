@@ -1,0 +1,54 @@
+name: Release
+
+# 打 tag（例如 v1.0.0）时自动构建并发布
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: 构建并发布
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: 配置 Gradle 缓存
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: 运行测试
+        run: ./gradlew :shared:jvmTest --console=plain
+
+      - name: 打包桌面版 jar
+        run: ./gradlew :desktopApp:fatJar --console=plain
+
+      - name: 准备发布文件
+        run: |
+          mkdir -p release
+          cp desktopApp/build/libs/NeteaseTagger.jar release/NeteaseTagger.jar
+
+      - name: 创建 Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/NeteaseTagger.jar
+          generate_release_notes: true
+          body: |
+            ## 怎么用
+
+            需要 **JDK 21+**（SaltUI 的 desktop 产物是 Java 21 字节码）。
+
+            ```bash
+            java -jar NeteaseTagger.jar
+            ```
+
+            详见 [README](https://github.com/${{ github.repository }}#readme)。

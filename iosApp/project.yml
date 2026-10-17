@@ -1,0 +1,48 @@
+# XcodeGen 配置：在 macOS 上执行 `xcodegen generate` 即可生成 iosApp.xcodeproj
+#
+# 前提：
+#   1. macOS + Xcode 15+
+#   2. 已在 E:\App\NeteaseTagger-KMP 执行过
+#        ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
+#      （或在 Intel Mac 上用 linkDebugFrameworkIosX64，真机用 linkDebugFrameworkIosArm64）
+#   3. 已安装 xcodegen：brew install xcodegen
+name: iosApp
+
+options:
+  bundleIdPrefix: app.tagger
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    ENABLE_USER_SCRIPT_SANDBOXING: NO
+
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: iosApp
+    info:
+      path: iosApp/Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.tagger.ios
+        PRODUCT_NAME: NeteaseTagger
+        # 指向 Gradle 产出的 Shared.framework 所在目录
+        FRAMEWORK_SEARCH_PATHS:
+          - "$(SRCROOT)/../shared/build/bin/iosSimulatorArm64/debugFramework"
+        OTHER_LDFLAGS:
+          - "-framework"
+          - "Shared"
+        LD_RUNPATH_SEARCH_PATHS:
+          - "@executable_path/Frameworks"
+
+    preBuildScripts:
+      - name: "Build shared Kotlin framework"
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64

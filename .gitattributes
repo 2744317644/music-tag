@@ -1,0 +1,8 @@
+# 换行符固定，避免 Windows 上提交的 CRLF 影响 Linux/macOS 构建
+gradlew text eol=lf
+*.bat text eol=crlf
+*.sh text eol=lf
+
+# 二进制
+*.jar binary
+*.png binary

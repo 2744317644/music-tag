@@ -1,4 +1,4 @@
-﻿package app.tagger.core.tags
+package app.tagger.core.tags
 
 import app.tagger.core.useCloseable
 

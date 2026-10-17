@@ -1,4 +1,4 @@
-﻿@file:OptIn(com.moriafly.salt.ui.UnstableSaltUiApi::class)
+@file:OptIn(com.moriafly.salt.ui.UnstableSaltUiApi::class)
 
 package app.tagger.ui
 

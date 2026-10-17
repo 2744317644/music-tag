@@ -1,4 +1,4 @@
-﻿package app.tagger.core
+package app.tagger.core
 
 import okio.FileSystem
 import okio.Path

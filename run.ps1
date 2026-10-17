@@ -1,4 +1,4 @@
-﻿# 启动网易云标签刮削器（桌面版）
+# 启动网易云标签刮削器（桌面版）
 # 需要 JDK 21+：SaltUI 的 desktop 产物用 Java 21 编译（class 65）
 # 用法：右键 → 使用 PowerShell 运行
 #   或：pwsh -File E:\App\NeteaseTagger-KMP\run.ps1

@@ -1,4 +1,4 @@
-﻿package app.tagger.core
+package app.tagger.core
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.submitForm

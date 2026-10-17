@@ -1,4 +1,4 @@
-﻿[versions]
+[versions]
 kotlin = "2.1.21"
 compose = "1.8.2"
 coroutines = "1.9.0"

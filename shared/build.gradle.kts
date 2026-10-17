@@ -1,4 +1,4 @@
-﻿import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.LibraryExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {

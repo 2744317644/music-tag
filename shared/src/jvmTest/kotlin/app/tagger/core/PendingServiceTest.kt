@@ -1,4 +1,4 @@
-﻿package app.tagger.core
+package app.tagger.core
 
 import app.tagger.core.tags.TagEngine
 import io.ktor.client.HttpClient

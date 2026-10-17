@@ -1,4 +1,4 @@
-﻿package app.tagger.android
+package app.tagger.android
 
 import android.net.Uri
 import android.os.Bundle

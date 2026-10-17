@@ -1,4 +1,4 @@
-﻿package app.tagger.ios
+package app.tagger.ios
 
 import androidx.compose.ui.window.ComposeUIViewController
 import app.tagger.core.FileSystemProvider

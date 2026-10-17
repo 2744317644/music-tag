@@ -1,4 +1,4 @@
-﻿# 网易云音乐标签刮削器 · Compose Multiplatform + SaltUI
+# 网易云音乐标签刮削器 · Compose Multiplatform + SaltUI
 
 [![CI](https://github.com/2744317644/music-tag/actions/workflows/ci.yml/badge.svg)](https://github.com/2744317644/music-tag/actions/workflows/ci.yml)
 [![Release](https://github.com/2744317644/music-tag/actions/workflows/release.yml/badge.svg)](https://github.com/2744317644/music-tag/actions/workflows/release.yml)

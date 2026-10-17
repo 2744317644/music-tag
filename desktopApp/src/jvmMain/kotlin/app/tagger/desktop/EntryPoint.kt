@@ -1,4 +1,4 @@
-﻿package app.tagger.desktop
+package app.tagger.desktop
 
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
